@@ -103,7 +103,10 @@
             $mail->Host='smtp.gmail.com';
             $mail->Port=587;
             $mail->SMTPAuth=true;
-            $mail->SMTPSecure='tls';
+           $mail->SMTPSecure='tls'; //ssl
+					$mail->SMTPOptions = array('ssl' => array('verify_peer' => false,
+														'verify_peer_name'  => false,
+														'allow_self_signed' => true));
 
             // h-hotel account
             $mail->Username='hotelsea.lebanon@gmail.com';
