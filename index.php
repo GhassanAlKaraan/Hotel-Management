@@ -1,6 +1,6 @@
-0<?php 
+<?php 
 
-//session_start();
+session_start();
 
 //connection
    include('connection.php');
@@ -278,8 +278,11 @@ if (empty($email) && empty($password)){
 	$_SESSION["Id_User"]=$row["Id_User"];
 
 	$_SESSION["login"]=1;
-	$qry00="select Username_User from user where Email_User = '$email'";
-	$res00=mysql_query($conn, $qry00);
+$qry00="select Username_User from user where Email_User='$email';";
+$row00=mysqli_query($conn,$qry00);
+while($r00=mysqli_fetch_assoc($row00)){
+	$_SESSION["username"]=$r00["Username_User"];
+}
 	
 		echo("<script>location.href = 'booking.php';</script>");
 }

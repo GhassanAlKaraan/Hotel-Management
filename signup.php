@@ -1,4 +1,5 @@
 <?php session_start();
+require "connection.php";
 
 ?>
 <!DOCTYPE.html>
@@ -212,68 +213,57 @@ background-image:url(hotel2.jpg),url(logoHotel1.png);
 	
 </form>
 
-</div>
+
 
 </body>
 </html>
 
-<?php 
-    include('connection.php');
-	if(isset($_POST["submit"])){
+<?php
+if(isset($_POST["submit"])){
 	if(isset($_POST["username"])&& isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["cpassword"])) {
-
-/////////////////////////////////////
-$username=mysqli_real_escape_string($conn,$_POST["username"]);
-$email=mysqli_real_escape_string($conn,$_POST["email"]);
-$password=mysqli_real_escape_string($conn,$_POST["password"]);
-$cpassword=mysqli_real_escape_string($conn,$_POST["cpassword"]);
-/////////////////////////////////////
+$cid=mysqli_connect("localhost","root","","hotel") or die('error connecting');
+$username=mysqli_real_escape_string($cid,$_POST["username"]);
+$email=mysqli_real_escape_string($cid,$_POST["email"]);
+$password=mysqli_real_escape_string($cid,$_POST["password"]);
+$cpassword=mysqli_real_escape_string($cid,$_POST["cpassword"]);
 $username=htmlspecialchars($username);
 $email=htmlspecialchars($email);
 $password=htmlspecialchars($password);
 $cpassword=htmlspecialchars($cpassword);
-/////////////////////////////////////
-	} //eza kello m3abba -> faweton bl variables
-	
-$isname=preg_match('@\b[A-Z][a-z]+(\s)[A-Z][a-z]{1,19}\b@',$username);
+
+
+if(!empty($_POST["password"])){
+	$name=preg_match('@\b[A-Z][a-z]+(\s)[A-Z][a-z]{1,19}\b@',$username);
 $uppercase = preg_match('@[A-Z]@', $password);
 $lowercase = preg_match('@[a-z]@', $password);
 $number  = preg_match('@[0-9]@', $password);
 $specialChars = preg_match('@[^\w]@', $password);
-	
-	
-        $check_query = mysqli_query($conn, "SELECT * FROM user where Email_User ='$email'");
-        $rowCount = mysqli_num_rows($check_query);
 
-        if(!empty($username) && !empty($email) && !empty($password) && !empty($cpassword)){
-            if($rowCount > 0){
+if(!$name){
+	echo '<div class="rederror">Your username is invalid,It should be upper case for the first character of the first name and space and upper case for the first letter of the last name.</div>';
+}
+else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+	echo '<div class="rederror">Your email address is invalid.</div>';
+	
+}else
+if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+    echo '<div class="rederror">Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.</div>';
+}
+else 
+if(strcmp($password,$cpassword)==0){
+	      $check_query = mysqli_query($conn, "SELECT * FROM user where Email_User ='$email'");
+        $rowCount = mysqli_num_rows($check_query);
+ if($rowCount > 0){
                 ?>
                 <script>
                     alert("User with email already exist!");
                 </script>
                 <?php
             }
-			else if ($_POST["password"] != $_POST["cpassword"]){
-				echo '<div class="rederror">Passwords dont match! Please try again';
-				}
-
-/*
-else if(!empty($_POST["password"])){
-*/
-else if(!$isname){
-	echo '<div class="rederror">Your username is invalid, It should be upper case for the first character of the first name and space and upper case for the first letter of the last name.';
-}
- else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-	echo '<div class="rederror">Your email address is invalid.';
-}
-
-else if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
-    echo '<div class="rederror">Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.';
-}
-/*
-} 
-*/
+			
 else {
+	
+  
                 //$password_hash = password_hash($password, PASSWORD_BCRYPT);
 
                 $result = mysqli_query($conn, "INSERT INTO user (Username_User, Email_User, Password_User, Cpassword_User, Code_Role, status) VALUES ('$username','$email', '$password', '$password', '1', '0')");
@@ -289,11 +279,11 @@ else {
                     $mail->Host='smtp.gmail.com';
                     $mail->Port=587;
                     $mail->SMTPAuth=true;
-                    $mail->SMTPSecure='tls'; //ssl
+                  $mail->SMTPSecure='tls'; //ssl
 					$mail->SMTPOptions = array('ssl' => array('verify_peer' => false,
 														'verify_peer_name'  => false,
 														'allow_self_signed' => true));
-	
+    
                     $mail->Username='hotelsea.lebanon@gmail.com';
                     $mail->Password='ejfepaaktnjazxiu';
     
@@ -321,20 +311,19 @@ else {
                                 </script>
                                 <?php
                             } //eza mail sent, ello go verify it now
-							
-							//Debugging mailer
-							//catch (phpmailerException $e) {
-							//echo $e->errorMessage(); //error messages from PHPMailer
-							//} catch (Exception $e) {
-							//echo $e->getMessage();
-							//}
-							
-							
-							
-							
                 } //eza fawat l data 3l table successfully, b3atle OTP
-            } // eza password w cpassword metel ba3ed: send OTP
-		} //eza m3abba kell l fields -> continue checkup
-} //eza kabas submit
+
+}
+}else if ($_POST["password"] != $_POST["cpassword"]){
+	echo "<script>window.alert('Passwords dont match!!! Please try again');</script>";
+}	
 	
+}
+}
+}else if(isset($_POST["login"])){
+	header("location:login.php");
+}
 ?>
+</div>
+</body>
+</html>
